@@ -12,7 +12,7 @@ export default function Docs() {
    <article className="guide-body" lang="en" dir="ltr">
     <h1>{standalone ? 'Explore the BTC market' : 'From your form to your first result'}</h1>
     {standalone ? <>
-     <p>View BTC/USDT price candles and volume using public Binance market data. Select a timeframe and use REFRESH to load a new snapshot. The current open candle may change.</p>
+     <p>View BTC/USDT price candles and volume using public Binance market data. The chart starts at 5 minutes and refreshes every 5 seconds while the page is visible. Use REFRESH for an immediate update. Chart labels use your device timezone; candle timestamps remain unchanged. The current open candle may change.</p>
      <p>Fill in your plan and select PREVIEW MY FORM to inspect your input as JSON. This mode does not run automated analysis or generate a complete Jev request. Admin access, saved history and daily analysis limits are paused.</p>
      <p>If the chart cannot load, check your connection to Binance public data and select RETRY. Missing market data is never replaced with made-up candles.</p>
     </> : <p>You do not need to write a prompt. Complete the form to inspect market structure and technical evidence. Selecting BUY or SELL never places a trade.</p>}

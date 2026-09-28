@@ -1,6 +1,6 @@
 import type { Candle, Market } from './types';
 
-export const timeframes = ['15m','1h','4h','1d','1w'];
+export const timeframes = ['5m','15m','1h','4h','1d','1w'];
 export function normalizeCandles(raw: unknown, now = Date.now()): Candle[] {
   if (!Array.isArray(raw) || !raw.length) throw new Error('Binance returned no candles.');
   let previous=-1;
