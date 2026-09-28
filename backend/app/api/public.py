@@ -12,6 +12,7 @@ from app.analysis.horizon import plan_for
 from app.decision.context import analyze
 from app.logging.events import event, analysis_id
 from app.storage.service import storage
+from app.storage.redis_store import StorageUnavailable
 from app.api.usage import visitor, status, reserve, refund
 
 router=APIRouter(prefix='/api')
@@ -55,6 +56,8 @@ async def submit(intent: UserIntent,request: Request,response: Response):
             public['human_preview']=result['human_preview']
             public['usage']=status(digest)
             return public
+    except StorageUnavailable:
+        raise
     except HTTPException:
         event('analysis_failed','analysis',level='ERROR',reason='Market data unavailable'); raise
     except Exception as exc:

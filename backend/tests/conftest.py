@@ -38,13 +38,14 @@ def pytest_sessionfinish(session,exitstatus):
     TEST_DIRECTORY.cleanup()
 
 
-@pytest.fixture(params=['json','mongodb'])
+@pytest.fixture(params=['json','redis'])
 def document_store(request,tmp_path,monkeypatch):
     import importlib
-    import mongomock
-    from app.storage.documents import JsonStore,MongoStore
+    import fakeredis
+    from app.storage.documents import JsonStore
+    from app.storage.redis_store import RedisStore
     target=(JsonStore(tmp_path/'records') if request.param=='json' else
-            MongoStore('mongodb://unused','test',client=mongomock.MongoClient()))
+            RedisStore(client=fakeredis.FakeRedis(decode_responses=True)))
     target.initialize()
     for name in ['app.main','app.storage.service','app.auth.service','app.auth.dependencies',
                  'app.api.admin','app.api.public','app.api.usage','app.api.health','app.logging.events']:

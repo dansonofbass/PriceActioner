@@ -24,11 +24,13 @@ def token_hash(token: str) -> str:
 
 def bootstrap_admin():
     if not settings.admin_password or not settings.admin_secret_key: return
+    if storage.get('admins',settings.admin_username): return
     storage.insert_once('admins',settings.admin_username,{
         'username':settings.admin_username,'password_hash':hash_password(settings.admin_password)})
 
 
 def login(username,password):
+    bootstrap_admin()
     admin=storage.get('admins',username)
     dummy='MDEyMzQ1Njc4OWFiY2RlZg==:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
     valid=verify(password,admin['password_hash'] if admin else dummy)

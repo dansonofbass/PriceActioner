@@ -76,6 +76,7 @@ def system():
     return {'config':ENGINE_CONFIG,'source_map':SOURCE_MAP,'jev_mode':'disabled','engine_version':settings.analysis_engine_version,
             'admin_configured':bool(settings.admin_secret_key),'data_source':'https://data-api.binance.vision',
             'runtime':f'Python / FastAPI / {storage.kind}','storage':storage.kind,
+            'retention':{'days':7,'analyses':100,'logs':2000} if storage.kind=='redis' else {'mode':'local JSON; no automatic retention'},
             'scope':'Public market data only; no execution or account access'}
 
 

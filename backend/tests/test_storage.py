@@ -33,8 +33,8 @@ def test_history_pagination_log_filters_literal_search(document_store):
 
 def test_atomic_quota_across_independent_store_clients(document_store):
     store=document_store
-    from app.storage.documents import MongoStore
-    other=JsonStore(store.root) if store.kind=='json' else MongoStore('mongodb://unused','test',client=store.client)
+    from app.storage.redis_store import RedisStore
+    other=JsonStore(store.root) if store.kind=='json' else RedisStore(client=store.client)
     def attempt(i):return (store if i%2 else other).reserve('daily_usage','same-day',3)
     with ThreadPoolExecutor(max_workers=8) as executor:
         assert sum(executor.map(attempt,range(12)))==3
@@ -54,9 +54,9 @@ def test_json_survives_new_instance_and_contains_json_only(tmp_path):
     assert not list(tmp_path.rglob('*.db'))
 
 
-def test_cloud_rejects_local_storage_and_missing_connection():
+def test_cloud_rejects_local_storage_and_invalid_url():
     with pytest.raises(ValidationError):Settings(vercel='1',storage_backend='json')
-    with pytest.raises(ValidationError):Settings(storage_backend='mongodb',mongodb_uri='')
-    valid=Settings(app_env='production',storage_backend='mongodb',mongodb_uri='mongodb+srv://user:pass@example.invalid/',
+    with pytest.raises(ValidationError):Settings(storage_backend='redis',upstash_redis_rest_url='http://localhost/')
+    valid=Settings(app_env='production',storage_backend='redis',upstash_redis_rest_url='https://example.upstash.io',
                    admin_secret_key='x'*48,public_origin='https://example.com',admin_password='')
-    assert valid.storage_backend=='mongodb'
+    assert valid.storage_backend=='redis'
