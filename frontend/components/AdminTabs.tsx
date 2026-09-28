@@ -1,0 +1,2 @@
+export const tabs=['OVERVIEW','RAW.DATA','INDICATORS','PRICE.ACTION','S/R','HORIZON','DECISION.CONTEXT','JEV.PREVIEW','HISTORY','LOGS','SYSTEM'];
+export default function AdminTabs({ active,onChange }: { active:string;onChange:(tab:string)=>void }) {return <nav className="admin-nav" aria-label="Admin sections">{tabs.map((tab,i)=><button key={tab} className={active===tab?'active':''} aria-current={active===tab?'page':undefined} onClick={()=>onChange(tab)}><small>{String(i+1).padStart(2,'0')}</small> &nbsp;{tab}</button>)}</nav>;}
