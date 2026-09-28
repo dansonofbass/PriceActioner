@@ -1,2 +1,2 @@
-// Default is independent market viewing, even if an old BACKEND_URL remains set.
-export const standalone = process.env.NEXT_PUBLIC_APP_MODE !== 'full';
+// Full analysis is the default. Set NEXT_PUBLIC_APP_MODE=standalone for chart-only preview.
+export const standalone = process.env.NEXT_PUBLIC_APP_MODE === 'standalone';
