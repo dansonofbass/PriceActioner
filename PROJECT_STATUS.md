@@ -1,44 +1,35 @@
-﻿# priceactioner — handoff state
+# PRICEACTIONER current handoff
 
-## Scope and completed product
+## Current requested architecture
 
-Milestone 1 implements a BTC/USDT analysis workstation using Next.js, React, TypeScript, Tailwind, Pixelify Sans and FastAPI/Pydantic. The deterministic engine computes normalized closed candles, strict cutoffs, indicators, confirmed pivots, structures, support/resistance strength, events, volume, volatility, confluence, horizon alignment, evidence and invalidation. No trading, wallets, exchange accounts or Binance credentials exist.
+FastAPI performs deterministic BTC analysis and builds an unsent Jev state/questions draft. Next.js provides public forms/results and authenticated admin inspection. No live Jev calls or trades exist.
 
-The public form, chart, results, Persian /docs walkthrough and REQUEST.PREVIEW are complete. The preview exposes the caller's exact local state/questions draft without secrets. Public disabled Jev labels were removed as requested, but live Jev integration remains unimplemented and JEV_MODE=disabled is enforced. Admin diagnostics state this truthfully.
+MongoDB runtime, dependencies and environment variables have been removed. Production uses Upstash Redis over HTTPS, with UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN. Local development retains JSON files and the existing local admin. MongoDB data is not migrated or deleted remotely.
 
-Admin includes login, salted scrypt hashes, hashed expiring session tokens, origin checks, login throttling, history, filtered logs, raw arrays, indicators, pivots, zones, horizon simulator, decision context, source map and configuration inspection. Production cookies are Secure, HttpOnly and SameSite=Strict.
+Redis stores salted admin hashes, hashed session tokens, anonymous visitor records, atomic daily quota counters, login throttles and bounded inspection records. It retains at most 100 analyses and 2000 log events, for at most seven days. Native expiries handle sessions (8 hours), daily counters (2 days), login throttles (10 minutes) and visitor records (1 year). Admin hashes do not expire. Large documents are compressed losslessly. Local JSON has no automatic retention.
 
-## Current persistence: no SQL runtime
+Lua scripts make quota increments/refunds and record/index writes atomic. HTTPS transport never logs tokens or returns upstream secrets. No automatic write retries are used because ambiguous network responses could otherwise double-count reservations. Redis eviction should remain disabled. Ordinary failures refund quota; a storage outage or hard process termination can leave a reservation until UTC reset. Log persistence is best effort during outages.
 
-- Local development: JSON documents under ignored backend/data, protected by an OS file lock and atomic replacement.
-- Production/Vercel: MongoDB Atlas via PyMongo. Local JSON mode is rejected in production/Vercel to avoid ephemeral persistence.
-- Admins, sessions, analyses, logs, visitors, daily quotas and login-attempt counters use the shared document interface. MongoDB quota reservations use a conditional atomic single-document update.
-- SQLAlchemy/SQLite runtime code and dependencies were removed.
-- Existing local records were migrated and compared: 1 admin, 1 session, 6 analyses, 333 logs, 2 visitors and 1 daily quota document at migration time. Further local use may add records.
-- The original database was moved to ignored artifacts/legacy-sqlite-backup.db for rollback; the running application does not read it. The user's local admin password hash was preserved.
-- upload_records.py previews counts by default; --confirm explicitly copies only local analyses/logs to configured MongoDB without overwriting existing IDs. No upload has been performed.
+ASGI startup does not contact Redis; /api/health reports OFFLINE and a safe diagnostic when credentials are missing or service is unavailable. Admin is bootstrapped on login. Quota-dependent requests fail closed with a clear 503; no ephemeral counter fallback exists.
 
-Three successful analyses per UTC day are enforced per browser cookie, with atomic reservations and ordinary-failure refunds. This is not verified per-person enforcement: clearing cookies or using another browser bypasses it. No automatic history retention policy exists.
+## Admin inspection
 
-## Deployment and handoff
+FORM.PROMPT replaces JEV.PREVIEW and explicitly displays original form, calculated readable context, state/questions and exact serialized draft. HISTORY opens this panel for the selected analysis. LOGS can filter to the selected analysis. Existing calculation/indicator/pivot/context tabs remain available. Overview displays storage type/status and retention limits.
 
-One GitHub repository is intended for two Vercel projects, root directories frontend and backend. Backend uses MongoDB Atlas; frontend BACKEND_URL points to backend, and backend PUBLIC_ORIGIN points to frontend. backend/vercel.json and .python-version configure the Python deployment. docs/DEPLOYMENT.fa.md provides the complete Persian folder, GitHub, Atlas, environment-variable, deployment and smoke-test instructions.
+## Deployment
 
-The source ZIP script excludes secrets, backend/data, old databases, environments, installed dependencies, caches, logs and build output. It verifies CRC and required/excluded paths. The user's Explorer screenshot showed Access denied for bin but no full path, so the exact Windows permission cause remains unconfirmed.
+Existing frontend: https://price-actioner.vercel.app
+Existing backend: https://price-actioner-api.vercel.app
+One repository, two Vercel projects, root directories frontend and backend. backend/vercel.json explicitly selects fastapi. Backend PUBLIC_ORIGIN points to frontend; frontend BACKEND_URL points to backend (without /api).
 
-No GitHub repository, Atlas cluster, Vercel deployment, paid plan or domain has been created. Live Atlas integration is unverified; cloud readiness is based on implementation, official deployment documentation and local tests, not an actual deployment.
+Private backend/.env.production was updated to redis while preserving the latest cloud admin password and session secret. Its two Redis credentials are blank and must be supplied by the user from Upstash. This is not yet a deployable authenticated Redis connection. Old MongoDB variables must also be removed from Vercel dashboard. No service/account was created, no remote records changed, and no push or deployment was performed in this change.
+
+Source ZIP excludes .env variants, local records, credentials, artifacts, installations and caches. Documentation: docs/DEPLOYMENT.fa.md and docs/USER_GUIDE.fa.md. Optional upload_records.py imports only local analysis/log records with --confirm.
 
 ## Verification
 
-- 67 Python tests passed after the storage migration. API/auth/history/logs/quota tests run against both real temporary JSON storage and a mocked MongoDB client. Tests cover concurrent reservations across independent store instances, midnight resets, refunds and persistence. Engine tests retain independent indicator recurrences and future-cutoff invariance.
-- One upstream Starlette TestClient deprecation warning remains; tests pass.
-- Next.js production build, including type checking, passed.
-- After migration, local frontend-proxy health, preserved admin login, six existing history records, saved-analysis retrieval, docs, usage and logout all returned HTTP 200. A fresh real multi-timeframe analysis completed READY without missing timeframes; its JSON record and exact serialized preview were verified. Local analysis count is now seven.
-- Earlier npm audit reported zero vulnerabilities and Python dependency check passed.
-- Browser automation surfaces were unavailable; rendered desktop/mobile visual QA has not been completed.
+72 Python tests passed, including JSON and Redis emulator API/auth/history/preview/quota tests, actual Lua execution, concurrent reservations, retention caps, TTL preservation, compression, REST command transport, secret-safe errors and startup without Redis credentials. One upstream Starlette test-client deprecation warning remains. Next.js production build and type checking passed. Live Upstash connection is unverified until credentials are supplied.
 
-## Assets and local operation
+User-provided logo/reference remain unchanged. Icon-only asset is absent. Browser-rendered visual QA has not been performed in this session.
 
-frontend/public/reference/ui-reference.png was inspected and guides the retro desktop. frontend/public/brand/priceactioner-logo.png is used without alteration. The icon-only asset is still absent; do not invent or crop it from the logo.
-
-Backend runs from backend at 127.0.0.1:8000; frontend is accessed at http://localhost:3000. The local admin username is admin and the user-chosen password remains in force; no plaintext credential is included in source or ZIP. setup_admin.py is available for explicit local password resets/new installations. Cloud accounts are separately bootstrapped from private environment variables, as documented.
+Local post-change smoke test: updated services are running; preserved admin login and seven previous history records verified. A new real Binance analysis returned READY, with original form, exact serialized preview and analysis-filtered log retrieval verified through the frontend proxy. Source ZIP scanned for private environment values; none found.

@@ -2,7 +2,7 @@
 
 For sharing a source-only ZIP and deploying this exact project: [Persian deployment guide](docs/DEPLOYMENT.fa.md). Run `python scripts/make_source_zip.py` from the root to package code without credentials, local databases or installed dependencies.
 
-Milestone 1: a BTC/USDT market-analysis workstation with a Next.js frontend, deterministic Python engine, JSON/MongoDB document storage, and authenticated admin inspection. No SQL database is required. **Jev is locked to `disabled`.** No trade execution, exchange accounts, wallet connections, or Binance credentials exist in this application.
+Milestone 1: a BTC/USDT market-analysis workstation with a Next.js frontend, deterministic Python engine, JSON/Redis document storage, and authenticated admin inspection. No SQL database is required. **Jev is locked to `disabled`.** No trade execution, exchange accounts, wallet connections, or Binance credentials exist in this application.
 
 ## Run locally (Windows / PowerShell)
 
@@ -46,7 +46,7 @@ npm.cmd run build
 npm.cmd audit
 ```
 
-Tests use fixed synthetic fixtures, isolated temporary JSON storage and a mocked MongoDB client. They never require Binance or send Jev requests. They independently check RSI/EMA/MACD/ATR recurrences, normalization, confirmed pivots, future-cutoff invariance, structures, zone strength, breakouts, volume, horizons, alignment, invalidation, context generation, sessions, CSRF, history, logs, failures and concurrent quota reservations across storage instances. Mocked MongoDB tests do not replace a real Atlas deployment smoke test.
+Tests use fixed synthetic fixtures, isolated temporary JSON storage and a Redis emulator running the actual Lua scripts. They never require Binance or send Jev requests. They independently check RSI/EMA/MACD/ATR recurrences, normalization, confirmed pivots, future-cutoff invariance, structures, zone strength, breakouts, volume, horizons, alignment, invalidation, context generation, sessions, CSRF, history, logs, failures and concurrent quota reservations across storage instances. Redis emulator tests do not replace a live Upstash deployment smoke test.
 
 ## Workspaces
 
@@ -82,10 +82,18 @@ The icon-only asset has not been supplied. Put the supplied icon at `frontend/ap
 
 ## Storage and deployment
 
-Local development defaults to `STORAGE_BACKEND=json` with locked, atomically replaced files under ignored `backend/data/`. Production requires `STORAGE_BACKEND=mongodb`, a private `MONGODB_URI` and `MONGODB_DATABASE=priceactioner`. Admins, sessions, analyses, logs, visitors, quotas and login-attempt counters live in the selected store. SQLAlchemy and SQLite are no longer runtime dependencies. JSON mode is rejected on Vercel to prevent relying on ephemeral local files.
+Local development uses locked JSON files under ignored `backend/data/`; existing local admin credentials and records are preserved. Production uses `STORAGE_BACKEND=redis` and Upstash Redis over HTTPS with two private variables: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. MongoDB, SQL and database network allowlists are no longer part of deployment.
 
-Deploy one GitHub repository as two Vercel projects: root `frontend` for Next.js and root `backend` for FastAPI. Connect the backend to MongoDB Atlas. Set backend `APP_ENV=production`, `PUBLIC_ORIGIN` to the frontend HTTPS origin and a strong `ADMIN_SECRET_KEY`. Set frontend `BACKEND_URL` to the backend production origin, then redeploy. The [complete Persian guide](docs/DEPLOYMENT.fa.md) includes every environment variable and verification step.
+Redis retains at most 100 recent analyses and 2,000 recent log events, each for at most seven days. Analysis documents are compressed losslessly. Sessions expire after eight hours; daily counters after two days (quota keys still reset at midnight UTC); login attempt counters after ten minutes. Admin hashes persist without automatic expiry. This is recent inspection history, not a permanent archive. Local JSON does not automatically expire records.
 
-Production session cookies are Secure, HttpOnly, SameSite=Strict and expire after 8 hours. Login attempts use a persistent limit of 5 per fixed 5-minute window per connection IP and supplied username. Session secrets and `.env` must stay private. History and structured logs have no automatic retention policy; arrange backups and cleanup appropriate to your use. `upload_records.py` previews optional local history/log migration; `--confirm` uploads to configured MongoDB without overwriting existing IDs or transferring credentials. No production hosting, domain or external service has been deployed.
+Quota reservations/refunds use atomic Redis Lua scripts shared by serverless instances. Keep Redis eviction disabled so memory pressure does not silently discard quota/authentication state. On a storage outage, quota-dependent analysis and login fail closed with an error, without falling back to an unreliable in-memory counter. Best-effort log recording does not itself stop market calculations; logs during an outage may be absent.
+
+The admin `FORM.PROMPT` panel shows the original form, calculated readable context, structured state/questions and exact serialized request. Select an item in HISTORY to inspect that record, and use SHOW SELECTED ANALYSIS LOGS in LOGS to filter its events. Jev requests remain unsent; live integration is a future step.
+
+Deploy this repository as two Vercel projects: `frontend` (Next.js) and `backend` (FastAPI). Backend uses the production environment file prepared privately as `backend/.env.production`; it is excluded from Git and source ZIPs. The two Redis values must be filled from the user's Upstash service. No external Redis account/service is created by this code change. Backend PUBLIC_ORIGIN is `https://price-actioner.vercel.app`; frontend BACKEND_URL is `https://price-actioner-api.vercel.app`. Changing frontend environment variables requires a rebuild/redeploy.
+
+`/api/health` stays reachable when Redis is missing or unavailable, reporting storage OFFLINE with a safe diagnostic. A configured environment and live smoke test are still required. First successful admin login bootstraps the admin hash in Redis from ADMIN_USERNAME/ADMIN_PASSWORD; the secret must remain stable. Existing admin hashes are never replaced by bootstrap. Optional `upload_records.py --confirm` imports local history/logs only into the bounded Redis history; without --confirm it only previews counts.
+
+Follow [the complete Persian deployment guide](docs/DEPLOYMENT.fa.md) for setup, push, environment values and verification.
 
 Experimental market-analysis software. Technical and model assessments are informational and are not financial advice.

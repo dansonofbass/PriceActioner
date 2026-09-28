@@ -7,17 +7,23 @@ from app.storage.service import storage
 from app.auth.service import bootstrap_admin
 from app.api import public,admin,health
 from app.logging.events import request_id
+from app.storage.redis_store import StorageUnavailable
 
 
 @asynccontextmanager
 async def lifespan(app):
     storage.initialize()
-    bootstrap_admin()
+    if storage.kind == 'json': bootstrap_admin()
     yield
 
 
 app=FastAPI(title='priceactioner',version=settings.analysis_engine_version,lifespan=lifespan,
             docs_url='/api/docs' if settings.app_env=='development' else None,redoc_url=None)
+
+
+@app.exception_handler(StorageUnavailable)
+async def storage_unavailable(request, exc):
+    return JSONResponse({'detail': str(exc)}, status_code=503)
 
 
 @app.middleware('http')

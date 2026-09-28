@@ -92,13 +92,13 @@ def test_primary_outage_and_partial_timeframe(client,monkeypatch,bars,intent):
 
 
 def test_health_has_no_secrets(client,monkeypatch):
-    monkeypatch.setattr(settings,'mongodb_uri','mongodb+srv://private-user:private-password@example.invalid/')
+    monkeypatch.setattr(settings,'upstash_redis_rest_token','private-password')
     response=client.get('/api/health')
     assert response.status_code==200
     assert response.json()['jev_mode']=='disabled'
     assert 'test-only' not in response.text
     assert 'private-password' not in response.text
-    assert response.json()['storage'] in ('json','mongodb')
+    assert response.json()['storage'] in ('json','redis')
 
 
 def test_invalid_intent(client,intent):

@@ -6,10 +6,10 @@ from typing import Literal
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
     app_env: str = 'development'
-    storage_backend: Literal['json', 'mongodb'] = 'json'
+    storage_backend: Literal['json', 'redis'] = 'json'
     local_data_dir: str = './data'
-    mongodb_uri: str = ''
-    mongodb_database: str = 'priceactioner'
+    upstash_redis_rest_url: str = ''
+    upstash_redis_rest_token: str = ''
     vercel: str = ''
     admin_username: str = 'admin'
     admin_password: str = ''
@@ -32,10 +32,13 @@ class Settings(BaseSettings):
             raise ValueError('Use an admin password of at least 12 characters and a secret of at least 32.')
         if self.app_env == 'production' and (not self.admin_secret_key or not self.public_origin.startswith('https://')):
             raise ValueError('Production requires ADMIN_SECRET_KEY and an HTTPS PUBLIC_ORIGIN.')
-        if (self.app_env == 'production' or self.vercel) and self.storage_backend != 'mongodb':
-            raise ValueError('Production/Vercel requires STORAGE_BACKEND=mongodb; local JSON is development-only.')
-        if self.storage_backend == 'mongodb' and not self.mongodb_uri.startswith(('mongodb://', 'mongodb+srv://')):
-            raise ValueError('Set MONGODB_URI to your private MongoDB connection string.')
+        if (self.app_env == 'production' or self.vercel) and self.storage_backend != 'redis':
+            raise ValueError('Production/Vercel requires STORAGE_BACKEND=redis; local JSON is development-only.')
+        if self.upstash_redis_rest_url:
+            from urllib.parse import urlsplit
+            url = urlsplit(self.upstash_redis_rest_url)
+            if url.scheme != 'https' or not url.hostname or not url.hostname.endswith('.upstash.io') or url.username or url.password or url.query or url.fragment or url.path not in ('', '/'):
+                raise ValueError('Use the HTTPS REST URL from Upstash, without a path, credentials or query.')
         if self.app_env == 'production' and len(self.admin_secret_key) < 32:
             raise ValueError('Production ADMIN_SECRET_KEY must have at least 32 characters.')
         return self

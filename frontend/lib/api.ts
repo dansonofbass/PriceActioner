@@ -1,6 +1,6 @@
 export async function api<T = Record<string, unknown>>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...options?.headers }, cache: 'no-store' });
-  const data = await response.json().catch(() => ({ detail: 'Backend unavailable. Start the Python service.' }));
+  const data = await response.json().catch(() => ({ detail: 'Backend unavailable. Check the backend deployment and API connection settings.' }));
   if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Invalid request. Check your inputs.');
   return data;
 }
