@@ -1,23 +1,72 @@
+﻿import type { Metadata } from 'next';
 import { standalone } from '@/lib/mode';
-import type { Metadata } from 'next';
 import BrandLogo from '@/components/BrandLogo';
 import RetroWindow from '@/components/RetroWindow';
 
-export const metadata: Metadata = { title: 'priceactioner — راهنمای استفاده' };
-export default function Docs(){if(standalone)return <main className="guide-page"><RetroWindow title="USER GUIDE" status="MARKET VIEW"><article className="guide-body" dir="rtl" lang="fa"><h1>??????? ???? ????? ?????</h1><p>?????? ???? ? ??? ???????? ???????? ?? ???? ????? Binance ?????? ??????. ????????? ?? ?????? ?? ? ???? ????????? ???? REFRESH ?? ???.</p><p>??? ?? ?? ?? ? PREVIEW MY FORM ?? ??? ?? ????? ???? ?? ?????. ??? ??? ????????? ??? ???? ????? Python? ?????? ???? Jev? ????? ?????? ? ???? ????? ?? ??? ???? ???? ??????.</p><p>?? ???? ???? ?????? ??????? ????? ???? ?? ???? ????? Binance ?? ????? ??. ???? ?????? ????? ???? ???????.</p><a href="/">?????? ?? ??????</a></article></RetroWindow></main>;return <main className="guide-page"><header className="admin-header"><BrandLogo/><a href="/">← BACK TO WORKSPACE</a></header><RetroWindow title="DOCS / QUICK START" status="USER GUIDE"><article className="guide-body" lang="fa" dir="rtl"><h1>از فرم تا اولین خروجی</h1><p>در priceactioner لازم نیست پرامپت بنویسی. فقط برنامه‌ای را که در نظر داری انتخاب کن؛ نرم‌افزار وضعیت بازار را بررسی می‌کند. انتخاب BUY یا SELL هیچ خریدوفروشی انجام نمی‌دهد.</p>
- <h2>۱. یک مثال برای یادگیری</h2><p>برای دیدن نحوه کار برنامه، این مثال آموزشی را وارد کن؛ این نمونه پیشنهاد خرید نیست:</p><ol><li><bdi>What are you considering?</bdi> ← <bdi>BUY BTC</bdi></li><li><bdi>When do you plan to act?</bdi> ← <bdi>NOW</bdi></li><li><bdi>How long do you plan to hold?</bdi> ← <bdi>7 DAYS</bdi></li><li><bdi>Risk tolerance</bdi> ← <bdi>BALANCED</bdi></li><li><bdi>Priority</bdi> ← <bdi>AVOID A BAD ENTRY</bdi></li><li>اگر بیت‌کوین نداری، گزینه <bdi>I already own BTC</bdi> را تیک نزن.</li><li>دکمه <bdi>ANALYZE BTC</bdi> را بزن و منتظر نتیجه بمان.</li></ol>
- <h2>۲. هر فیلد چه معنی دارد؟</h2><dl className="guide-fields"><div><dt>تصمیمی که بررسی می‌کنی</dt><dd><bdi>BUY BTC</bdi>: خرید را بررسی می‌کنی. <bdi>SELL BTC</bdi>: فروش را بررسی می‌کنی. <bdi>ALREADY OWN BTC</bdi>: بیت‌کوین داری و وضعیت نگهداری را می‌سنجی. <bdi>WAIT FOR ENTRY</bdi>: فعلاً منتظر ورود هستی.</dd></div><div><dt>زمان اقدام</dt><dd>چه زمانی می‌خواهی تصمیم بگیری؟ <bdi>NOW</bdi> یعنی همین حالا؛ <bdi>WITHIN 3 DAYS</bdi> یعنی طی سه روز آینده.</dd></div><div><dt>مدت نگهداری</dt><dd>اگر وارد شوی، حدوداً چند روز می‌خواهی نگه داری؟ این گزینه با زمان اقدام فرق دارد و وزن تایم‌فریم‌ها را تغییر می‌دهد. برای فروش نمایش داده نمی‌شود؛ در آن حالت زمان اقدام مبنای افق تحلیل است.</dd></div><div><dt>ریسک‌پذیری</dt><dd><bdi>CONSERVATIVE</bdi>: محتاط. <bdi>BALANCED</bdi>: متعادل. <bdi>AGGRESSIVE</bdi>: ریسک‌پذیرتر.</dd></div><div><dt>اولویت</dt><dd><bdi>AVOID A BAD ENTRY</bdi>: دوری از ورود نامناسب. <bdi>CATCH TREND EARLY</bdi>: توجه به شروع روند. <bdi>BALANCED</bdi>: تعادل بین این دو.</dd></div><div><dt>مالکیت و قیمت ورود</dt><dd>اگر بیت‌کوین داری، گزینه مالکیت را فعال کن. قیمت ورود اختیاری و برحسب USDT است؛ اگر نمی‌دانی، خالی بگذار. برای <bdi>ALREADY OWN BTC</bdi> مالکیت خودکار فعال می‌شود.</dd></div></dl><p>ریسک، اولویت و قیمت ورود در ورودی ساخته‌شده ذخیره می‌شوند. فعلاً محاسبات واقعی بازار مثل RSI و حمایت را تغییر نمی‌دهند و توصیه شخصی تولید نمی‌کنند.</p>
- <h2>۳. خروجی را چطور بخوانی؟</h2><ul><li><bdi>ANALYSIS.RESULT</bdi>: ساختار فعلی و افق انتخاب‌شده. قیمت مرجع از کندل بسته‌شده می‌آید؛ ممکن است با قیمت لحظه‌ای نمودار فرق داشته باشد.</li><li><bdi>LEVELS.SR</bdi>: محدوده‌های حمایت و مقاومت و امتیاز قدرتشان. اگر داده کافی نباشد، سطحی ساخته نمی‌شود.</li><li><bdi>MOMENTUM / VOLUME / VOLATILITY</bdi>: مومنتوم، حجم و نوسان.</li><li><bdi>TECHNICAL.EVIDENCE</bdi>: جمع شواهد صعودی، نزولی و نامشخص برابر ۱۰۰ است؛ این امتیاز احتمال قطعی آینده نیست.</li><li><bdi>THESIS.VALIDITY</bdi>: شرایطی که ساختار فعلی را تضعیف یا بی‌اعتبار می‌کند.</li></ul>
- <h2>۴. ورودی دقیق چگونه ساخته می‌شود؟</h2><p>بعد از تحلیل، پنجره <bdi>REQUEST.PREVIEW</bdi> را باز کن. چهار نمایش دارد:</p><ol><li><bdi>READABLE</bdi>: خلاصه قابل‌خواندن تحلیل و فرم تو.</li><li><bdi>STATE</bdi>: شیء JSON شامل فرم تو، افق تحلیل و محاسبات Python.</li><li><bdi>QUESTIONS</bdi>: شش سؤال ثابت درباره جهت بازار، تناسب افق، دوام روند، کیفیت شواهد، ریسک و پشتیبانی از برنامه کاربر.</li><li><bdi>FULL REQUEST</bdi>: متن کامل و دقیق JSON ساخته‌شده. <bdi>COPY FULL REQUEST</bdi> همین متن را کپی می‌کند.</li></ol><pre dir="ltr">{`{
-  "model": null,
-  "state": {
-    "user_intent": { "action": "buy", "holding_period_days": 7 },
-    "analysis_plan": {
-      "primary_timeframe": "4h",
-      "timeframe_weights": { "1h": 0.15, "4h": 0.45, "1d": 0.40 }
-    }
-  },
-  "questions": [ ... ]
-}`}</pre><p>کد بالا فقط نمایش کوتاه‌شده ساختار است، نه یک درخواست کامل. مقادیر واقعی بازار و تمام فیلدها را در <bdi>FULL REQUEST</bdi> همان تحلیل می‌بینی. اگر مدل تنظیم نشده باشد، مقدار <bdi>model</bdi> برابر <bdi>null</bdi> است. هیچ کلید API در این خروجی نیست.</p><p>در این مرحله فقط ورودی محلی ساخته می‌شود و چیزی به سرویس هوش مصنوعی فرستاده نمی‌شود. سازگاری نهایی این قالب با API زنده هنوز بررسی نشده است.</p>
- <h2>۵. سه درخواست در روز</h2><p>هر کاربر روزانه ۳ تحلیل دارد. فعلاً چون ورود کاربری نداریم، سهمیه با کوکی همان مرورگر محاسبه می‌شود و ساعت ۰۰:۰۰ UTC از نو شروع می‌شود. تعداد باقی‌مانده بالای فرم دیده می‌شود. خطای تحلیل از سهمیه کم نمی‌کند؛ تغییر تایم‌فریم نمودار و باز کردن راهنما هم رایگان است.</p><p>این سقف، شناسایی قطعی هر شخص نیست: مرورگر یا دستگاه دیگر سهمیه جدا دارد و پاک‌کردن کوکی هویت مرورگر را از بین می‌برد.</p>
- <a className="guide-start" href="/">برگشت به فرم و گرفتن اولین خروجی ←</a></article></RetroWindow></main>;}
+export const metadata: Metadata = { title: 'priceactioner - User Guide' };
+
+export default function Docs() {
+ return <main className="guide-page">
+  <header className="admin-header"><BrandLogo/><a href="/">BACK TO WORKSPACE</a></header>
+  <RetroWindow title="DOCS / QUICK START" status={standalone ? 'MARKET VIEW' : 'USER GUIDE'}>
+   <article className="guide-body" lang="en" dir="ltr">
+    <h1>{standalone ? 'Explore the BTC market' : 'From your form to your first result'}</h1>
+    {standalone ? <>
+     <p>View BTC/USDT price candles and volume using public Binance market data. Select a timeframe and use REFRESH to load a new snapshot. The current open candle may change.</p>
+     <p>Fill in your plan and select PREVIEW MY FORM to inspect your input as JSON. This mode does not run automated analysis or generate a complete Jev request. Admin access, saved history and daily analysis limits are paused.</p>
+     <p>If the chart cannot load, check your connection to Binance public data and select RETRY. Missing market data is never replaced with made-up candles.</p>
+    </> : <p>You do not need to write a prompt. Complete the form to inspect market structure and technical evidence. Selecting BUY or SELL never places a trade.</p>}
+
+    <h2>1. Try an example</h2>
+    <p>This example explains the form; it is not a recommendation to buy.</p>
+    <ol>
+     <li>What are you considering? Select BUY BTC.</li>
+     <li>When do you plan to act? Select NOW.</li>
+     <li>How long do you plan to hold? Select 7 DAYS.</li>
+     <li>Risk tolerance: select BALANCED.</li>
+     <li>Priority: select AVOID A BAD ENTRY.</li>
+     <li>Leave I already own BTC unchecked if you do not own Bitcoin.</li>
+     <li>{standalone ? 'Select PREVIEW MY FORM to see your input.' : 'Select ANALYZE BTC and wait for the result.'}</li>
+    </ol>
+
+    <h2>2. Understand the fields</h2>
+    <dl className="guide-fields">
+     <div><dt>Action</dt><dd>BUY BTC considers buying. SELL BTC considers selling. ALREADY OWN BTC considers holding an existing position. WAIT FOR ENTRY describes waiting before entering.</dd></div>
+     <div><dt>Action timing</dt><dd>When you plan to make your decision. NOW means immediately; WITHIN 3 DAYS means during the next three days.</dd></div>
+     <div><dt>Holding period</dt><dd>How long you intend to hold after entering. This differs from action timing. In full analysis mode, it determines the analysis horizon and timeframe weights. For selling, action timing supplies the horizon instead.</dd></div>
+     <div><dt>Risk tolerance</dt><dd>CONSERVATIVE means cautious, BALANCED means moderate, and AGGRESSIVE means more willing to take risk.</dd></div>
+     <div><dt>Priority</dt><dd>AVOID A BAD ENTRY emphasizes entry quality. CATCH TREND EARLY emphasizes the start of a trend. BALANCED represents a balance between them.</dd></div>
+     <div><dt>Ownership and entry price</dt><dd>Select ownership if you already hold BTC. Entry price is optional and expressed in USDT; leave it empty if unknown. ALREADY OWN BTC enables ownership automatically.</dd></div>
+    </dl>
+    <p>Risk tolerance, priority and entry price are included in your input. They do not change objective market calculations or create a personalized recommendation.</p>
+
+    {!standalone && <>
+     <h2>3. Read the result</h2>
+     <ul>
+      <li>ANALYSIS.RESULT: market structure and your selected horizon. The reference price uses a closed candle and may differ from the chart snapshot.</li>
+      <li>LEVELS.SR: support and resistance zones with strength scores. No level is invented when data is insufficient.</li>
+      <li>MOMENTUM / VOLUME / VOLATILITY: momentum indicators, trading activity and price variation.</li>
+      <li>TECHNICAL.EVIDENCE: bullish, bearish and uncertain evidence sum to 100. These scores are not calibrated probabilities.</li>
+      <li>THESIS.VALIDITY: conditions that weaken or invalidate the current structure.</li>
+     </ul>
+     <h2>4. Inspect the exact request</h2>
+     <p>After an analysis, open REQUEST.PREVIEW:</p>
+     <ol>
+      <li>READABLE: a readable summary of the form and analysis.</li>
+      <li>STATE: JSON containing your intent, analysis horizon and Python calculations.</li>
+      <li>QUESTIONS: six fixed questions about direction, horizon fit, trend persistence, evidence quality, risk and support for your plan.</li>
+      <li>FULL REQUEST: the exact serialized JSON for that analysis. COPY FULL REQUEST copies it without API keys.</li>
+     </ol>
+     <p>The draft contains model, state and questions. Your form appears in state.user_intent. Market calculations supply the remaining context. If no model is configured, model is null.</p>
+     <p>This is an inspection draft. Nothing is sent to Jev, and compatibility with its live API contract has not been verified.</p>
+     <p>In the admin workspace, select an analysis in HISTORY and open FORM.PROMPT to inspect the form, calculated context and request. LOGS can filter events for the selected analysis.</p>
+     <h2>5. Daily allowance and history</h2>
+     <p>The allowance is three successful analyses per browser per UTC day, resetting at 00:00 UTC. Ordinary analysis failures refund the reservation. Chart refreshes and guide views do not consume the allowance. A storage outage or interrupted process may prevent a refund.</p>
+     <p>This is a browser-based allowance, not verified identity enforcement. Another browser or cleared cookies can bypass it.</p>
+     <p>Online Redis history retains up to 100 analyses and 2,000 log events for at most seven days. Local JSON history does not automatically expire.</p>
+    </>}
+    <a className="guide-start" href="/">{standalone ? 'BACK TO THE CHART AND FORM' : 'BACK TO THE ANALYSIS FORM'}</a>
+   </article>
+  </RetroWindow>
+ </main>;
+}
