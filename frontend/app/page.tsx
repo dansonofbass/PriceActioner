@@ -1,31 +1,4 @@
-'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
-import MarketHeader from '@/components/MarketHeader';
-import RetroWindow from '@/components/RetroWindow';
-import AnalysisForm from '@/components/AnalysisForm';
-import ResultPanels from '@/components/ResultPanels';
-import RequestPreview from '@/components/RequestPreview';
-import { api, money, number } from '@/lib/api';
-import type { Intent, Market, Result, Usage } from '@/lib/types';
-const BTCChart=dynamic(()=>import('@/components/BTCChart'),{ssr:false,loading:()=> <div className="chart-empty">LOADING.CHART…</div>});
-export default function Home() {
- const [market,setMarket]=useState<Market|null>(null),[tf,setTf]=useState('4h'),[marketError,setMarketError]=useState(''),[loadingMarket,setLoadingMarket]=useState(true);
- const [result,setResult]=useState<Result|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[stage,setStage]=useState(0);
- const [health,setHealth]=useState<{backend:string;binance:string;analysis_engine_version:string}|null>(null);
- const [usage,setUsage]=useState<Usage|null>(null),[usageError,setUsageError]=useState('');
- const refreshUsage=useCallback(async()=>{try{setUsage(await api<Usage>('/usage'));setUsageError('');}catch{setUsageError('Could not load your daily allowance. Please retry.');}},[]);
- useEffect(()=>{void refreshUsage();},[refreshUsage]);
- useEffect(()=>{if(!usage)return;const delay=Math.max(1000,Date.parse(usage.resets_at)-Date.now()+500);const timer=setTimeout(()=>void refreshUsage(),delay);return()=>clearTimeout(timer);},[usage,refreshUsage]);
- const fetchMarket=useCallback(async(signal?:AbortSignal)=>{setLoadingMarket(true);setMarketError('');try{const m=await api<Market>(`/market?timeframe=${tf}`,{signal});setMarket(m);}catch(e){if(!signal?.aborted){setMarket(null);setMarketError((e as Error).message);}}finally{if(!signal?.aborted)setLoadingMarket(false);}},[tf]);
- useEffect(()=>{const controller=new AbortController();setMarket(null);void fetchMarket(controller.signal);return()=>controller.abort();},[fetchMarket]);
- useEffect(()=>{api<typeof health>('/health').then(setHealth).catch(()=>setHealth(null));},[result]);
- useEffect(()=>{if(!busy)return;setStage(0);const timer=setInterval(()=>setStage(s=>Math.min(s+1,2)),1400);return()=>clearInterval(timer);},[busy]);
- async function analyze(intent:Intent){if(!usage||usage.remaining===0)return;setBusy(true);setError('');setResult(null);try{const data=await api<Result>('/analyze',{method:'POST',body:JSON.stringify(intent)});setResult(data);setTf(data.context.analysis_plan.primary_timeframe);if(data.usage)setUsage(data.usage);}catch(e){setError((e as Error).message);}finally{setBusy(false);void refreshUsage();}}
- const latest=market?.candles.at(-1), first=market?.candles.at(-2);const change=latest&&first?(latest.close/first.close-1)*100:null;
- const zones=useMemo(()=>{if(!result)return[];const sr=result.context.support_resistance[tf];return sr?[sr.nearest_support,sr.nearest_resistance].filter(z=>z!==null):[];},[result,tf]);
- return <><MarketHeader status={loadingMarket?'FETCHING':marketError?'UNAVAILABLE':market?'LIVE SNAPSHOT':'OFFLINE'} updated={market?.fetched_at}/><main className="workspace"><div className="usage-banner"><div><strong>3 ANALYSES PER USER / DAY</strong><p>Allowance is tracked per browser and resets at 00:00 UTC. Failed analyses do not count.</p></div><div aria-live="polite">{usage?<strong>{usage.remaining} OF {usage.limit} REMAINING TODAY</strong>:<span>CHECKING ALLOWANCE...</span>}<a href="/docs">HOW TO FILL THE FORM</a>{usage?.remaining===0&&<p>Next reset: {new Date(usage.resets_at).toLocaleString()}</p>}{usageError&&<p role="alert">{usageError} <button onClick={()=>void refreshUsage()}>RETRY</button></p>}</div></div><div className="main-grid"><AnalysisForm onSubmit={analyze} busy={busy} disabled={!usage || usage.remaining===0}/><div className="market-column"><RetroWindow title="MARKET.BTC" status="BINANCE / SPOT"><div className="market-heading"><div><span className="eyebrow">BITCOIN / TETHER</span><div className="market-price">{money(latest?.close)}</div></div><div className="price-change"><span>{change==null?'—':`${change>=0?'+':''}${number(change)}%`}</span><small>VS PREVIOUS {tf.toUpperCase()} CLOSE</small></div></div><div className="chart-toolbar"><div className="timeframes" aria-label="Chart timeframe">{['15m','1h','4h','1d','1w'].map(t=><button type="button" key={t} aria-pressed={tf===t} className={tf===t?'active':''} onClick={()=>setTf(t)}>{t.toUpperCase()}</button>)}</div><button type="button" onClick={()=>void fetchMarket()} disabled={loadingMarket}>REFRESH ↻</button></div>{market?<BTCChart candles={market.candles} zones={zones}/>:<div className="chart-empty"><div className="empty-candles" aria-hidden="true">▂ ▆ ▃ █ ▅ ▇</div><strong>{loadingMarket?'FETCHING.BTC.DATA':'MARKET DATA UNAVAILABLE'}</strong><p>{loadingMarket?'Connecting to Binance public market data…':marketError}</p>{!loadingMarket&&<button onClick={()=>void fetchMarket()}>RETRY CONNECTION</button>}</div>}<div className="chart-caption"><span>□ PRICE &nbsp; ▥ VOLUME {result?' · BLUE: STRUCTURAL LEVELS':''}</span><span>UTC · OPEN CANDLE MAY CHANGE</span></div></RetroWindow>
- <RetroWindow title="ENGINE.STATUS" status="v0.1.0"><div className="engine-status"><span className="engine-glyph" aria-hidden="true">▦</span><div><strong>{busy?['FETCHING MARKET DATA…','RUNNING PRICE ACTION…','BUILDING MARKET STATE…'][stage]:result?'ANALYSIS COMPLETE':'READY WHEN YOU ARE.'}</strong><p>{busy?'Processing closed candles across your selected horizon.':result?`Analysis ${result.analysis_id.slice(0,8)} · ${result.status}`:'Set your intent to inspect structure, levels, and technical evidence.'}</p></div><span className="outline-tag">3 / DAY</span></div></RetroWindow></div></div>
- <div role="status" aria-live="polite">{error&&<div className="notice error">{error} <button onClick={()=>setError('')}>DISMISS</button></div>}</div>{result?<><ResultPanels result={result}/><div className="results"><RequestPreview key={result.analysis_id} result={result}/></div></>:<div className="standby"><span>01 / SET YOUR PLAN</span><span>02 / ANALYZE THE MARKET</span><span>03 / INSPECT THE EVIDENCE</span></div>}
- <footer><div className="system-bar"><span>BINANCE: {market?'ONLINE':loadingMarket?'CONNECTING':'UNAVAILABLE'}</span><span>PYTHON: {health?.backend==='ONLINE'?'READY':'UNAVAILABLE'}</span><a href="/docs">USER GUIDE</a><span>ENGINE: v{health?.analysis_engine_version||'0.1.0'}</span></div><p>Experimental market-analysis software. Technical and model assessments are informational and are not financial advice.</p><a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">Charts by TradingView Lightweight Charts™</a></footer></main></>;
-}
+import FullWorkspace from '@/components/FullWorkspace';
+import StandaloneWorkspace from '@/components/StandaloneWorkspace';
+import { standalone } from '@/lib/mode';
+export default function Home(){return standalone ? <StandaloneWorkspace/> : <FullWorkspace/>;}

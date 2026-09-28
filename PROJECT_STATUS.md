@@ -1,5 +1,9 @@
 # PRICEACTIONER current handoff
 
+## Latest user override: standalone frontend first
+
+Default mode is now standalone (NEXT_PUBLIC_APP_MODE must explicitly equal full to enable the earlier architecture). The page directly fetches public Binance candles with no /api calls, no backend rewrite, no Redis or authentication. The form previews only its own JSON. Admin/login/docs correctly reflect paused analysis features. Full Python/Redis source is retained for later. Frontend production build and type checks passed; candle validation/direct fetch contract was checked, and a real Binance request returned HTTP 200 with Access-Control-Allow-Origin: *. Live Vercel deployment has not been updated by this agent. Use docs/FRONTEND_ONLY.fa.md for the current deployment steps.
+
 ## Current requested architecture
 
 FastAPI performs deterministic BTC analysis and builds an unsent Jev state/questions draft. Next.js provides public forms/results and authenticated admin inspection. No live Jev calls or trades exist.

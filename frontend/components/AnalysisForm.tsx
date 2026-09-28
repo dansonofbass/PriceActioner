@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import RetroWindow from './RetroWindow';
 import type { Intent } from '@/lib/types';
-export default function AnalysisForm({ onSubmit, busy, disabled = false }: { onSubmit: (intent: Intent) => void; busy: boolean; disabled?: boolean }) {
+export default function AnalysisForm({ onSubmit, busy, disabled = false, submitLabel='ANALYZE BTC', note='PRICE ACTION FIRST. NO PROMPT REQUIRED.' }: { onSubmit: (intent: Intent) => void; busy: boolean; disabled?: boolean; submitLabel?:string; note?:string }) {
  const [action,setAction]=useState('buy'); const [owns,setOwns]=useState(false);
  return <RetroWindow title="PLAN.BTC" status="01"><form onSubmit={event=>{event.preventDefault();const f=new FormData(event.currentTarget);onSubmit({ action, action_timing_days:Number(f.get('timing')), holding_period_days:action==='sell'?null:Number(f.get('holding')), risk_profile:String(f.get('risk')),priority:String(f.get('priority')), owns_btc:owns,entry_price:owns && f.get('entry')?Number(f.get('entry')):null });}}>
   <div className="panel-intro"><span className="eyebrow">BTC / USDT · ANALYSIS INPUT</span><h1>Your market plan.</h1><p>Set your horizon. Inspect the evidence.</p></div>
@@ -12,6 +12,6 @@ export default function AnalysisForm({ onSubmit, busy, disabled = false }: { onS
   <div className="form-split"><label className="field"><span>Risk tolerance</span><select name="risk" defaultValue="balanced"><option value="conservative">CONSERVATIVE</option><option value="balanced">BALANCED</option><option value="aggressive">AGGRESSIVE</option></select></label><label className="field"><span>Priority</span><select name="priority" defaultValue="avoid_bad_entry"><option value="avoid_bad_entry">AVOID A BAD ENTRY</option><option value="catch_trend_early">CATCH TREND EARLY</option><option value="balanced">BALANCED</option></select></label></div>
   <label className="checkbox-field"><input type="checkbox" checked={owns} disabled={action==='hold'} onChange={e=>setOwns(e.target.checked)}/> I already own BTC</label>
   {owns && <label className="field"><span>Entry price (optional, USDT)</span><input name="entry" type="number" min="0.01" step="0.01" placeholder="e.g. 95000"/></label>}
-  <button className="primary-button" type="submit" disabled={busy || disabled}>{busy?'ANALYZING.BTC…':'ANALYZE BTC'}<span aria-hidden="true">↗</span></button><p className="form-note">PRICE ACTION FIRST. NO PROMPT REQUIRED.</p>
+  <button className="primary-button" type="submit" disabled={busy || disabled}>{busy?'ANALYZING.BTC…':submitLabel}<span aria-hidden="true">↗</span></button><p className="form-note">{note}</p>
  </form></RetroWindow>;
 }

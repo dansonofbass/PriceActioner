@@ -1,5 +1,7 @@
 # priceactioner
 
+**Current default: standalone frontend.** The BTC chart loads public Binance candles directly in the browser; no Python backend, Redis or private API is needed. The form previews its input only. Analysis, admin, history, quota and Jev are paused in this mode. Set `NEXT_PUBLIC_APP_MODE=standalone` on the Vercel frontend and deploy the latest commit. See [the short Persian frontend-only guide](docs/FRONTEND_ONLY.fa.md). The full application described below remains available only with `NEXT_PUBLIC_APP_MODE=full`.
+
 For sharing a source-only ZIP and deploying this exact project: [Persian deployment guide](docs/DEPLOYMENT.fa.md). Run `python scripts/make_source_zip.py` from the root to package code without credentials, local databases or installed dependencies.
 
 Milestone 1: a BTC/USDT market-analysis workstation with a Next.js frontend, deterministic Python engine, JSON/Redis document storage, and authenticated admin inspection. No SQL database is required. **Jev is locked to `disabled`.** No trade execution, exchange accounts, wallet connections, or Binance credentials exist in this application.
