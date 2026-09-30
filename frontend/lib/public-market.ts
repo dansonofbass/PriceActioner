@@ -29,7 +29,9 @@ export async function fetchPublicMarket(timeframe:string, signal?:AbortSignal):P
     });
     if(!response.ok)throw new Error(`Binance market data unavailable (HTTP ${response.status}).`);
     const fetched_at=Date.now();
-    return {candles:normalizeCandles(await response.json(),fetched_at),fetched_at,timeframe,status:'LIVE'};
+    const candles=normalizeCandles(await response.json(),fetched_at);
+    if(candles.at(-1)!.close_timestamp<fetched_at-60000)throw new Error('Binance returned an outdated candle snapshot. Refresh when the connection is restored.');
+    return {candles,fetched_at,timeframe,status:'LIVE'};
   } catch(error) {
     if(signal?.aborted)throw error;
     if(controller.signal.aborted)throw new Error('Market request timed out. Retry the connection to Binance.');

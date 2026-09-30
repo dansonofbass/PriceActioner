@@ -13,7 +13,7 @@ export default function BTCChart({ candles, zones = EMPTY_ZONES }: { candles: Ca
  useEffect(()=>{
   if(!container.current)return;
   const chart=createChart(container.current,{autoSize:true,
-   layout:{background:{type:ColorType.Solid,color:'#f1f1f1'},textColor:'#252525',fontFamily:'Pixelify Sans, monospace',fontSize:12,attributionLogo:true},
+   layout:{background:{type:ColorType.Solid,color:'#f1f1f1'},textColor:'#252525',fontFamily:getComputedStyle(document.body).fontFamily,fontSize:12,attributionLogo:true},
    localization:{locale:'en-GB',timeFormatter:(time:Time)=>localChartTime(time)},
    grid:{vertLines:{color:'#dedede'},horzLines:{color:'#dedede'}},rightPriceScale:{borderColor:'#080808'},
    timeScale:{borderColor:'#080808',timeVisible:true,tickMarkFormatter:(time:Time,kind:TickMarkType)=>localChartTick(time,kind)},
